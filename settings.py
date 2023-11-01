@@ -3,7 +3,7 @@ HEIGHT     = 720
 FULLSCREEN = False
 
 FPS        = 60
-TILESIZE   = 64
+TILE_SIZE  = 64
  
 WORLD_MAP = [
     ['x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x'],
