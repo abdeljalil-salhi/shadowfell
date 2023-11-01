@@ -26,4 +26,6 @@ class Level:
                 if tile == "x":
                     Tile((x, y), [self.visible_sprites, self.obstacle_sprites])
                 elif tile == "p":
-                    self.player = Player((x, y), [self.visible_sprites])
+                    self.player = Player(
+                        (x, y), [self.visible_sprites], self.obstacle_sprites
+                    )

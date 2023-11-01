@@ -4,10 +4,11 @@ from settings import *
 
 
 class Player(sprite.Sprite):
-    def __init__(self, pos, groups) -> None:
+    def __init__(self, pos, groups, obstacle_sprites) -> None:
         super().__init__(groups)
         self.image = image.load("assets/test/player.png").convert_alpha()
         self.rect = self.image.get_rect(topleft=pos)
+        self.obstacle_sprites = obstacle_sprites
 
         self.direction = math.Vector2(0, 0)
         self.speed = 5
@@ -35,5 +36,31 @@ class Player(sprite.Sprite):
         # Normalize the direction vector to prevent faster diagonal movement
         if self.direction.magnitude() != 0:
             self.direction = self.direction.normalize()
-        # Move the player in the direction of the vector
-        self.rect.center += self.direction * speed
+        # Move the player horizontally and check for collisions
+        self.rect.x += self.direction.x * speed
+        self.collide("horizontal")
+        # Move the player vertically and check for collisions
+        self.rect.y += self.direction.y * speed
+        self.collide("vertical")
+
+    def collide(self, direction) -> None:
+        if direction == "horizontal":
+            for sprite in self.obstacle_sprites:
+                # Prevent the player from overlapping with the obstacle
+                if sprite.rect.colliderect(self.rect):
+                    # If the player is moving right, set the player's right side to the left side of the object it hit
+                    if self.direction.x > 0:
+                        self.rect.right = sprite.rect.left
+                    # If the player is moving left, set the player's left side to the right side of the object it hit
+                    elif self.direction.x < 0:
+                        self.rect.left = sprite.rect.right
+        elif direction == "vertical":
+            for sprite in self.obstacle_sprites:
+                # Prevent the player from overlapping with the obstacle
+                if sprite.rect.colliderect(self.rect):
+                    # If the player is moving down, set the player's bottom side to the top side of the object it hit
+                    if self.direction.y > 0:
+                        self.rect.bottom = sprite.rect.top
+                    # If the player is moving up, set the player's top side to the bottom side of the object it hit
+                    elif self.direction.y < 0:
+                        self.rect.top = sprite.rect.bottom
