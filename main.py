@@ -1,7 +1,17 @@
-from pygame import init, display, time, event, QUIT, quit, FULLSCREEN as FS
+from pygame import (
+    init,
+    display,
+    time,
+    event,
+    QUIT,
+    quit,
+    FULLSCREEN as FS,
+    KEYDOWN,
+    K_ESCAPE,
+)
 from sys import exit
-from settings import *
 
+from settings import *
 from src.level import Level
 
 
@@ -19,7 +29,7 @@ class Game:
     def run(self) -> None:
         while True:
             for e in event.get():
-                if e.type == QUIT:
+                if e.type == QUIT or (e.type == KEYDOWN and e.key == K_ESCAPE):
                     quit()
                     exit()
 

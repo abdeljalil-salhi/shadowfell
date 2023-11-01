@@ -1,8 +1,9 @@
 from pygame import display, sprite
-from settings import *
 
+from settings import *
 from src.tile import Tile
 from src.player import Player
+from debug import debug
 
 
 class Level:
@@ -15,6 +16,8 @@ class Level:
 
     def run(self) -> None:
         self.visible_sprites.draw(self.display_surface)
+        self.visible_sprites.update()
+        debug(self.player.direction)
 
     def create_map(self) -> None:
         for i, row in enumerate(WORLD_MAP):
@@ -23,4 +26,4 @@ class Level:
                 if tile == "x":
                     Tile((x, y), [self.visible_sprites, self.obstacle_sprites])
                 elif tile == "p":
-                    Player((x, y), [self.visible_sprites])
+                    self.player = Player((x, y), [self.visible_sprites])
