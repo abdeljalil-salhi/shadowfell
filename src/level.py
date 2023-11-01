@@ -29,6 +29,7 @@ class Level:
         }
         assets = {
             "grass": import_folder("assets/grass"),
+            "objects": import_folder("assets/objects"),
         }
         for style, layout in layouts.items():
             for i, row in enumerate(layout):
@@ -50,13 +51,13 @@ class Level:
                                 random_grass,
                             )
                         elif style == "object":
-                            pass
-        #         if tile == "x":
-        #             Tile((x, y), [self.visible_sprites, self.obstacle_sprites])
-        #         elif tile == "p":
-        #             self.player = Player(
-        #                 (x, y), [self.visible_sprites], self.obstacle_sprites
-        #             )
+                            object_surface = assets["objects"][int(tile)]
+                            Tile(
+                                (x, y),
+                                [self.visible_sprites, self.obstacle_sprites],
+                                "object",
+                                object_surface,
+                            )
         self.player = Player(
             (2000, 1430), [self.visible_sprites], self.obstacle_sprites
         )
