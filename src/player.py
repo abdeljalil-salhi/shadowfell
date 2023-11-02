@@ -1,4 +1,4 @@
-from pygame import sprite, image, math, key, K_w, K_a, K_s, K_d
+from pygame import sprite, image, math, key, K_w, K_a, K_s, K_d, transform
 
 from settings import *
 
@@ -6,7 +6,10 @@ from settings import *
 class Player(sprite.Sprite):
     def __init__(self, pos, groups, obstacle_sprites) -> None:
         super().__init__(groups)
-        self.image = image.load("assets/test/player.png").convert_alpha()
+        self.image = transform.scale(
+            image.load("assets/test/player.png").convert_alpha(),
+            (TILE_SIZE, TILE_SIZE),
+        )
         self.rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(0, -26)
 

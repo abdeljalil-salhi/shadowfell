@@ -1,7 +1,9 @@
 from os import walk
 from os.path import join
 from csv import reader
-from pygame import image
+from pygame import image, transform
+
+from settings import TILE_SIZE
 
 
 def import_csv_layout(path) -> list:
@@ -27,6 +29,16 @@ def import_folder(path, isObject=False) -> list:
     for filename in filenames:
         full_path = join(path, filename)
         image_surface = image.load(full_path).convert_alpha()
+        if isObject:
+            width, height = image_surface.get_size()
+            if height > width:
+                image_surface = transform.scale(
+                    image_surface, (TILE_SIZE, TILE_SIZE * 2)
+                )
+            else:
+                image_surface = transform.scale(
+                    image_surface, (TILE_SIZE * 2, TILE_SIZE * 2)
+                )
         surface_list.append(image_surface)
 
     return surface_list
