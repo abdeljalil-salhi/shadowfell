@@ -29,7 +29,7 @@ class Level:
         }
         assets = {
             "grass": import_folder("assets/grass"),
-            "objects": import_folder("assets/objects"),
+            "objects": import_folder("assets/objects", True),
         }
         for style, layout in layouts.items():
             for i, row in enumerate(layout):

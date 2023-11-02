@@ -33,7 +33,7 @@ class Game:
                     quit()
                     exit()
 
-            self.screen.fill("black")
+            self.screen.fill((113, 221, 238))
             self.level.run()
             display.update()
             self.clock.tick(FPS)
