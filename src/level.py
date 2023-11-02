@@ -20,6 +20,7 @@ class Level:
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
         debug(self.player.direction)
+        debug("state: " + self.player.state, y=30)
 
     def create_map(self) -> None:
         layouts = {

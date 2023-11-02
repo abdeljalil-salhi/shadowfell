@@ -27,8 +27,7 @@ def import_folder(path, isObject=False) -> list:
         filenames.sort(key=lambda x: int(x.split(".")[0]))
 
     for filename in filenames:
-        full_path = join(path, filename)
-        image_surface = image.load(full_path).convert_alpha()
+        image_surface = image.load(join(path, filename)).convert_alpha()
         if isObject:
             width, height = image_surface.get_size()
             if height > width:
@@ -39,6 +38,8 @@ def import_folder(path, isObject=False) -> list:
                 image_surface = transform.scale(
                     image_surface, (TILE_SIZE * 2, TILE_SIZE * 2)
                 )
+        else:
+            image_surface = transform.scale(image_surface, (TILE_SIZE, TILE_SIZE))
         surface_list.append(image_surface)
 
     return surface_list
