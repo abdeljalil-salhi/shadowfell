@@ -5,22 +5,29 @@ from settings import *
 from debug import debug
 from src.tile import Tile
 from src.player import Player
+from src.weapon import Weapon
 from src.utils import import_csv_layout, import_folder
 
 
 class Level:
-    def __init__(self) -> None:
+    def __init__(self, game) -> None:
+        self.game = game
+
         self.display_surface = display.get_surface()
         self.visible_sprites = FollowingCameraGroup()
         self.obstacle_sprites = sprite.Group()
+        self.current_attack = None
 
         self.create_map()
 
     def run(self) -> None:
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
-        debug(self.player.direction)
-        debug("state: " + self.player.state, y=30)
+
+        if DEBUG:
+            debug(f"VECTOR: {self.player.direction}")
+            debug(f"STATE: {self.player.state}", y=30)
+            debug(f"FPS: {str(int(self.game.clock.get_fps()))}", y=50)
 
     def create_map(self) -> None:
         layouts = {
@@ -60,8 +67,20 @@ class Level:
                                 object_surface,
                             )
         self.player = Player(
-            (2000, 1430), [self.visible_sprites], self.obstacle_sprites
+            (2000, 1430),
+            [self.visible_sprites],
+            self.obstacle_sprites,
+            self.create_attack,
+            self.destroy_attack,
         )
+
+    def create_attack(self) -> None:
+        self.current_attack = Weapon(self.player, [self.visible_sprites])
+
+    def destroy_attack(self) -> None:
+        if self.current_attack:
+            self.current_attack.kill()
+            self.current_attack = None
 
 
 class FollowingCameraGroup(sprite.Group):

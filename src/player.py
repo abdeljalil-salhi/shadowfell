@@ -19,7 +19,9 @@ from src.utils import import_folder
 
 
 class Player(sprite.Sprite):
-    def __init__(self, pos, groups, obstacle_sprites) -> None:
+    def __init__(
+        self, pos, groups, obstacle_sprites, create_attack, destroy_attack
+    ) -> None:
         super().__init__(groups)
         self.image = transform.scale(
             image.load("assets/test/player.png").convert_alpha(),
@@ -41,6 +43,12 @@ class Player(sprite.Sprite):
         self.attacking = False
         self.attack_cooldown = 400
         self.attack_timer = None
+
+        # Weapon stats
+        self.create_attack = create_attack
+        self.destroy_attack = destroy_attack
+        self.weapon_selected = 0
+        self.weapon = list(WEAPON.keys())[self.weapon_selected]
 
     def update(self) -> None:
         self.input()
@@ -107,6 +115,7 @@ class Player(sprite.Sprite):
         if keys[K_SPACE]:
             self.attacking = True
             self.attack_timer = time.get_ticks()
+            self.create_attack()
 
         # Cast a spell if the player is holding Q
         if keys[K_q]:
@@ -173,3 +182,4 @@ class Player(sprite.Sprite):
         if self.attacking:
             if current_time - self.attack_timer >= self.attack_cooldown:
                 self.attacking = False
+                self.destroy_attack()

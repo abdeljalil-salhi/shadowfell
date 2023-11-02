@@ -24,7 +24,7 @@ class Game:
         display.set_caption("Shadowfell")
         self.clock = time.Clock()
 
-        self.level = Level()
+        self.level = Level(self)
 
     def run(self) -> None:
         while True:
