@@ -3,6 +3,7 @@ from pygame import (
     display,
     time,
     event,
+    mouse,
     QUIT,
     quit,
     FULLSCREEN as FS,
@@ -22,6 +23,7 @@ class Game:
             (WIDTH, HEIGHT)
         )
         display.set_caption("Shadowfell")
+        mouse.set_visible(False)
         self.clock = time.Clock()
 
         self.level = Level(self)

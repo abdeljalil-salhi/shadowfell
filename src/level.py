@@ -1,5 +1,7 @@
 from pygame import display, sprite, math, image
 from random import choice
+from json import dump, load
+from os import path
 
 from settings import *
 from debug import debug
@@ -12,6 +14,20 @@ from src.utils import import_csv_layout, import_folder
 class Level:
     def __init__(self, game) -> None:
         self.game = game
+
+        if not path.exists("data/player.json"):
+            with open("data/player.json", "w") as file:
+                self.player_data = {
+                    "position": (2000, 1430),
+                    "weapon_selected": 0,
+                }
+                dump(
+                    self.player_data,
+                    file,
+                )
+        else:
+            with open("data/player.json", "r") as file:
+                self.player_data = load(file)
 
         self.display_surface = display.get_surface()
         self.visible_sprites = FollowingCameraGroup()
@@ -67,7 +83,7 @@ class Level:
                                 object_surface,
                             )
         self.player = Player(
-            (2000, 1430),
+            self.player_data["position"],
             [self.visible_sprites],
             self.obstacle_sprites,
             self.create_attack,

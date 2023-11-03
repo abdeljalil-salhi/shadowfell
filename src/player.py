@@ -13,6 +13,7 @@ from pygame import (
     transform,
     time,
 )
+from json import dump, load
 
 from settings import *
 from src.utils import import_folder
@@ -20,15 +21,19 @@ from src.utils import import_folder
 
 class Player(sprite.Sprite):
     def __init__(
-        self, pos, groups, obstacle_sprites, create_attack, destroy_attack
+        self, position, groups, obstacle_sprites, create_attack, destroy_attack
     ) -> None:
         super().__init__(groups)
         self.image = transform.scale(
-            image.load("assets/test/player.png").convert_alpha(),
+            image.load("assets/init/player.png").convert_alpha(),
             (TILE_SIZE, TILE_SIZE),
         )
-        self.rect = self.image.get_rect(topleft=pos)
+        self.rect = self.image.get_rect(topleft=position)
         self.hitbox = self.rect.inflate(0, -26)
+        self.needs_save = False
+
+        with open("data/player.json", "r") as file:
+            data = load(file)
 
         self.obstacle_sprites = obstacle_sprites
 
@@ -47,7 +52,7 @@ class Player(sprite.Sprite):
         # Weapon stats
         self.create_attack = create_attack
         self.destroy_attack = destroy_attack
-        self.weapon_selected = 0
+        self.weapon_selected = data["weapon_selected"]
         self.weapon = list(WEAPON.keys())[self.weapon_selected]
 
     def update(self) -> None:
@@ -56,6 +61,19 @@ class Player(sprite.Sprite):
         self.get_state()
         self.animate()
         self.move(self.speed)
+        self.save()
+
+    def save(self) -> None:
+        if "idle" in self.state and self.needs_save:
+            with open("data/player.json", "w") as file:
+                dump(
+                    {
+                        "position": self.rect.topleft,
+                        "weapon_selected": self.weapon_selected,
+                    },
+                    file,
+                )
+                self.needs_save = False
 
     def animate(self) -> None:
         animation = self.animations[self.state]
@@ -127,6 +145,7 @@ class Player(sprite.Sprite):
         if self.direction.x == 0 and self.direction.y == 0:
             if not "idle" in self.state and not "attack" in self.state:
                 self.state += "_idle"
+                self.needs_save = True
 
         # Attack if the player is attacking
         if self.attacking:
