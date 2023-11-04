@@ -11,6 +11,7 @@ from pygame import (
     K_LSHIFT,
     K_q,
     K_w,
+    K_e,
     transform,
     time,
 )
@@ -22,7 +23,14 @@ from src.utils import import_folder
 
 class Player(sprite.Sprite):
     def __init__(
-        self, game, position, groups, obstacle_sprites, create_attack, destroy_attack
+        self,
+        game,
+        position,
+        groups,
+        obstacle_sprites,
+        create_attack: callable,
+        destroy_attack: callable,
+        create_spell: callable,
     ) -> None:
         super().__init__(groups)
         self.game = game
@@ -51,22 +59,19 @@ class Player(sprite.Sprite):
         self.attack_cooldown = 400
         self.attack_timer = None
 
-        self.stats = {
-            "health": 100,
-            "mana": 100,
-            "stamina": 100,
-            "attack": 10,
-            "defense": 10,
-            "magic": 4,
-            "speed": 0.4,
-        }
-        self.health = self.stats["health"] * 0.5
-        self.mana = self.stats["mana"] * 0.8
-        self.stamina = self.stats["stamina"] * 0.9
-        self.attack = self.stats["attack"]
-        self.defense = self.stats["defense"]
-        self.magic = self.stats["magic"]
-        self.speed = self.stats["speed"]
+        self.health, self.max_health = data["health"] * 0.5, data["health"]
+        self.mana, self.max_mana = data["mana"] * 0.8, data["mana"]
+        self.stamina, self.max_stamina = data["stamina"] * 0.9, data["stamina"]
+        self.armor, self.initial_armor = data["armor"], data["armor"]
+        self.attack_damage, self.initial_attack_damage = (
+            data["attack_damage"],
+            data["attack_damage"],
+        )
+        self.ability_power, self.initial_ability_power = (
+            data["ability_power"],
+            data["ability_power"],
+        )
+        self.speed, self.initial_speed = data["speed"], data["speed"]
         self.experience = 0
 
         # Weapon stats
@@ -74,9 +79,17 @@ class Player(sprite.Sprite):
         self.destroy_attack = destroy_attack
         self.weapon_selected = data["weapon_selected"]
         self.weapon = list(WEAPON.keys())[self.weapon_selected]
-        self.able_to_switch = True
-        self.switch_timer = None
-        self.switch_cooldown = 200
+        self.able_to_switch_weapon = True
+        self.weapon_switch_timer = None
+        self.weapon_switch_cooldown = 200
+
+        # Spell stats
+        self.create_spell = create_spell
+        self.spell_selected = data["spell_selected"]
+        self.spell = list(SPELL.keys())[self.spell_selected]
+        self.able_to_switch_spell = True
+        self.spell_switch_timer = None
+        self.spell_switch_cooldown = 200
 
     def update(self) -> None:
         self.input()
@@ -93,6 +106,15 @@ class Player(sprite.Sprite):
                     {
                         "position": self.rect.topleft,
                         "weapon_selected": self.weapon_selected,
+                        "spell_selected": self.spell_selected,
+                        "health": self.health,
+                        "mana": self.mana,
+                        "stamina": self.stamina,
+                        "armor": self.armor,
+                        "attack_damage": self.attack_damage,
+                        "ability_power": self.ability_power,
+                        "speed": self.speed,
+                        "experience": self.experience,
                     },
                     file,
                 )
@@ -148,9 +170,9 @@ class Player(sprite.Sprite):
 
         # Sprint if the player is holding shift
         if keys[K_LSHIFT]:
-            self.speed = self.stats["speed"] * 1.5
+            self.speed = self.initial_speed * 1.5
         else:
-            self.speed = self.stats["speed"]
+            self.speed = self.initial_speed
 
         # Attack if the player is holding space
         if keys[K_SPACE]:
@@ -162,12 +184,25 @@ class Player(sprite.Sprite):
         if keys[K_q]:
             self.attacking = True
             self.attack_timer = time.get_ticks()
+            self.create_spell(
+                list(SPELL.keys())[self.spell_selected],
+                list(SPELL.values())[self.spell_selected]["efficiency"]
+                + self.ability_power,
+                list(SPELL.values())[self.spell_selected]["cost"],
+            )
 
-        if keys[K_w] and self.able_to_switch:
-            self.able_to_switch = False
-            self.switch_timer = time.get_ticks()
+        if keys[K_w] and self.able_to_switch_weapon:
+            self.able_to_switch_weapon = False
+            self.weapon_switch_timer = time.get_ticks()
             self.weapon_selected = (self.weapon_selected + 1) % len(WEAPON)
             self.weapon = list(WEAPON.keys())[self.weapon_selected]
+            self.needs_save = True
+
+        if keys[K_e] and self.able_to_switch_spell:
+            self.able_to_switch_spell = False
+            self.spell_switch_timer = time.get_ticks()
+            self.spell_selected = (self.spell_selected + 1) % len(SPELL)
+            self.spell = list(SPELL.keys())[self.spell_selected]
             self.needs_save = True
 
     def get_state(self) -> None:
@@ -233,6 +268,10 @@ class Player(sprite.Sprite):
                 self.attacking = False
                 self.destroy_attack()
 
-        if not self.able_to_switch:
-            if current_time - self.switch_timer >= self.switch_cooldown:
-                self.able_to_switch = True
+        if not self.able_to_switch_weapon:
+            if current_time - self.weapon_switch_timer >= self.weapon_switch_cooldown:
+                self.able_to_switch_weapon = True
+
+        if not self.able_to_switch_spell:
+            if current_time - self.spell_switch_timer >= self.spell_switch_cooldown:
+                self.able_to_switch_spell = True

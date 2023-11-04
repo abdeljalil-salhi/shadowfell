@@ -24,29 +24,34 @@ class GUI:
                 image.load(weapon["asset"]).convert_alpha(),
             )
 
+        # Spell overlay settings
+        self.spell_assets = []
+        for spell in SPELL.values():
+            self.spell_assets.append(
+                image.load(spell["asset"]).convert_alpha(),
+            )
+
     def display(self, player) -> None:
         self.display_bar(
             player.health,
-            player.stats["health"],
+            player.max_health,
             self.health_bar_rect,
             HEALTH_BAR_COLOR,
         )
         self.display_bar(
-            player.mana, player.stats["mana"], self.mana_bar_rect, MANA_BAR_COLOR
+            player.mana, player.max_mana, self.mana_bar_rect, MANA_BAR_COLOR
         )
         self.display_bar(
             player.stamina,
-            player.stats["stamina"],
+            player.max_stamina,
             self.stamina_bar_rect,
             STAMINA_BAR_COLOR,
         )
+
         self.display_experience(player.experience)
-        self.weapon_overlay(player.weapon_selected, not player.able_to_switch)
-        self.display_item_box(
-            ITEM_BOX_SIZE,
-            self.display_surface.get_height() - ITEM_BOX_SIZE - 5,
-            False,
-        )
+
+        self.weapon_overlay(player.weapon_selected, not player.able_to_switch_weapon)
+        self.spell_overlay(player.spell_selected, not player.able_to_switch_spell)
 
     def display_bar(self, current, max_amount, background_rect, color) -> None:
         draw.rect(
@@ -126,3 +131,15 @@ class GUI:
             center=background_rect.center,
         )
         self.display_surface.blit(weapon_surface, weapon_rect)
+
+    def spell_overlay(self, spell_selected: int, has_switched: bool) -> None:
+        background_rect = self.display_item_box(
+            ITEM_BOX_SIZE,
+            self.display_surface.get_height() - ITEM_BOX_SIZE - 5,
+            has_switched,
+        )
+        spell_surface = self.spell_assets[spell_selected]
+        spell_rect = spell_surface.get_rect(
+            center=background_rect.center,
+        )
+        self.display_surface.blit(spell_surface, spell_rect)

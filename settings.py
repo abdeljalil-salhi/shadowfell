@@ -39,15 +39,15 @@ WEAPON = {
     },
 }
 
-MAGIC = {
+SPELL = {
     "flame": {
         "cost": 20,
-        "efficience": 5,
+        "efficiency": 5,
         "asset": "assets/particles/flame/full.png",
     },
     "heal": {
         "cost": 30,
-        "efficience": 20,
+        "efficiency": 20,
         "asset": "assets/particles/heal/full.png",
     },
 }

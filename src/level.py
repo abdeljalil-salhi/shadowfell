@@ -21,6 +21,15 @@ class Level:
                 self.player_data = {
                     "position": (2000, 1430),
                     "weapon_selected": 0,
+                    "spell_selected": 0,
+                    "health": 100,
+                    "mana": 100,
+                    "stamina": 100,
+                    "armor": 0,
+                    "attack_damage": 10,
+                    "ability_power": 4,
+                    "speed": 0.4,
+                    "experience": 0,
                 }
                 dump(
                     self.player_data,
@@ -97,6 +106,7 @@ class Level:
             self.obstacle_sprites,
             self.create_attack,
             self.destroy_attack,
+            self.create_spell,
         )
 
     def create_attack(self) -> None:
@@ -106,6 +116,9 @@ class Level:
         if self.current_attack:
             self.current_attack.kill()
             self.current_attack = None
+
+    def create_spell(self, spell: str, efficiency: int, cost: int) -> None:
+        pass
 
 
 class FollowingCameraGroup(sprite.Group):
