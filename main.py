@@ -25,6 +25,8 @@ class Game:
         display.set_caption("Shadowfell")
         mouse.set_visible(False)
         self.clock = time.Clock()
+        self.delta_time = 1
+        self.frames = FPS
 
         self.level = Level(self)
 
@@ -38,7 +40,8 @@ class Game:
             self.screen.fill((113, 221, 238))
             self.level.run()
             display.update()
-            self.clock.tick(FPS)
+            self.delta_time = self.clock.tick(FPS)
+            self.frames = self.frames * self.delta_time / 1000
 
 
 if __name__ == "__main__":

@@ -1,0 +1,128 @@
+from pygame import display, font, Rect, draw, image, transform
+
+from settings import *
+
+
+class GUI:
+    def __init__(self) -> None:
+        self.display_surface = display.get_surface()
+        self.font = font.Font(GUI_FONT_FAMILY, GUI_FONT_SIZE)
+
+        # Bar settings
+        self.health_bar_rect = Rect(10, 10, HEALTH_BAR_WIDTH, BAR_HEIGHT)
+        self.mana_bar_rect = Rect(
+            10, self.health_bar_rect.bottom + 3, MANA_BAR_WIDTH, BAR_HEIGHT
+        )
+        self.stamina_bar_rect = Rect(
+            10, self.mana_bar_rect.bottom + 3, STAMINA_BAR_WIDTH, BAR_HEIGHT
+        )
+
+        # Weapon overlay settings
+        self.weapon_assets = []
+        for weapon in WEAPON.values():
+            self.weapon_assets.append(
+                image.load(weapon["asset"]).convert_alpha(),
+            )
+
+    def display(self, player) -> None:
+        self.display_bar(
+            player.health,
+            player.stats["health"],
+            self.health_bar_rect,
+            HEALTH_BAR_COLOR,
+        )
+        self.display_bar(
+            player.mana, player.stats["mana"], self.mana_bar_rect, MANA_BAR_COLOR
+        )
+        self.display_bar(
+            player.stamina,
+            player.stats["stamina"],
+            self.stamina_bar_rect,
+            STAMINA_BAR_COLOR,
+        )
+        self.display_experience(player.experience)
+        self.weapon_overlay(player.weapon_selected, not player.able_to_switch)
+        self.display_item_box(
+            ITEM_BOX_SIZE,
+            self.display_surface.get_height() - ITEM_BOX_SIZE - 5,
+            False,
+        )
+
+    def display_bar(self, current, max_amount, background_rect, color) -> None:
+        draw.rect(
+            self.display_surface,
+            GUI_BACKGROUND_COLOR,
+            background_rect,
+        )
+        draw.rect(
+            self.display_surface,
+            color,
+            (
+                background_rect.x,
+                background_rect.y,
+                background_rect.width * (current / max_amount),
+                background_rect.height,
+            ),
+        )
+        draw.rect(
+            self.display_surface,
+            GUI_BORDER_COLOR,
+            background_rect,
+            3,
+        )
+
+    def display_experience(self, experience) -> None:
+        text_surface = self.font.render(f"{int(experience)} EXP", False, GUI_TEXT_COLOR)
+        text_rect = text_surface.get_rect(
+            bottomright=(
+                self.display_surface.get_width() - 20,
+                self.display_surface.get_height() - 20,
+            )
+        )
+        draw.rect(
+            self.display_surface,
+            GUI_BACKGROUND_COLOR,
+            text_rect.inflate(20, 10),
+        )
+        self.display_surface.blit(text_surface, text_rect)
+        draw.rect(
+            self.display_surface,
+            GUI_BORDER_COLOR,
+            text_rect.inflate(20, 10),
+            3,
+        )
+
+    def display_item_box(self, left, top, has_switched: bool) -> Rect:
+        background_rect = Rect(left, top, ITEM_BOX_SIZE, ITEM_BOX_SIZE)
+        draw.rect(
+            self.display_surface,
+            GUI_BACKGROUND_COLOR,
+            background_rect,
+        )
+        if has_switched:
+            draw.rect(
+                self.display_surface,
+                GUI_BORDER_COLOR_ACTIVE,
+                background_rect,
+                3,
+            )
+        else:
+            draw.rect(
+                self.display_surface,
+                GUI_BORDER_COLOR,
+                background_rect,
+                3,
+            )
+        return background_rect
+
+    def weapon_overlay(self, weapon_selected: int, has_switched: bool) -> None:
+        background_rect = self.display_item_box(
+            10,
+            self.display_surface.get_height() - ITEM_BOX_SIZE - 10,
+            has_switched,
+        )
+        weapon_surface = self.weapon_assets[weapon_selected]
+        weapon_rect = weapon_surface.get_rect(
+            center=background_rect.center,
+        )
+        self.display_surface.blit(weapon_surface, weapon_rect)

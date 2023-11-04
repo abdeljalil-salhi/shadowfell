@@ -10,6 +10,7 @@ from pygame import (
     K_SPACE,
     K_LSHIFT,
     K_q,
+    K_w,
     transform,
     time,
 )
@@ -21,9 +22,10 @@ from src.utils import import_folder
 
 class Player(sprite.Sprite):
     def __init__(
-        self, position, groups, obstacle_sprites, create_attack, destroy_attack
+        self, game, position, groups, obstacle_sprites, create_attack, destroy_attack
     ) -> None:
         super().__init__(groups)
+        self.game = game
         self.image = transform.scale(
             image.load("assets/init/player.png").convert_alpha(),
             (TILE_SIZE, TILE_SIZE),
@@ -40,20 +42,41 @@ class Player(sprite.Sprite):
         self.import_player_assets()
         self.state = "down_idle"
         self.frame = 0
-        self.animation_speed = 0.15
+        self.animation_speed = 0.01
 
         # Player stats
         self.direction = math.Vector2(0, 0)
-        self.speed = 5
+
         self.attacking = False
         self.attack_cooldown = 400
         self.attack_timer = None
+
+        self.stats = {
+            "health": 100,
+            "mana": 100,
+            "stamina": 100,
+            "attack": 10,
+            "defense": 10,
+            "magic": 4,
+            "speed": 0.4,
+        }
+        self.health = self.stats["health"] * 0.5
+        self.mana = self.stats["mana"] * 0.8
+        self.stamina = self.stats["stamina"] * 0.9
+        self.attack = self.stats["attack"]
+        self.defense = self.stats["defense"]
+        self.magic = self.stats["magic"]
+        self.speed = self.stats["speed"]
+        self.experience = 0
 
         # Weapon stats
         self.create_attack = create_attack
         self.destroy_attack = destroy_attack
         self.weapon_selected = data["weapon_selected"]
         self.weapon = list(WEAPON.keys())[self.weapon_selected]
+        self.able_to_switch = True
+        self.switch_timer = None
+        self.switch_cooldown = 200
 
     def update(self) -> None:
         self.input()
@@ -64,7 +87,7 @@ class Player(sprite.Sprite):
         self.save()
 
     def save(self) -> None:
-        if "idle" in self.state and self.needs_save:
+        if self.needs_save:
             with open("data/player.json", "w") as file:
                 dump(
                     {
@@ -77,7 +100,7 @@ class Player(sprite.Sprite):
 
     def animate(self) -> None:
         animation = self.animations[self.state]
-        self.frame += self.animation_speed
+        self.frame += self.animation_speed * self.game.delta_time
         if self.frame >= len(animation):
             self.frame = 0
         self.image = animation[int(self.frame)]
@@ -125,9 +148,9 @@ class Player(sprite.Sprite):
 
         # Sprint if the player is holding shift
         if keys[K_LSHIFT]:
-            self.speed = 10
+            self.speed = self.stats["speed"] * 1.5
         else:
-            self.speed = 5
+            self.speed = self.stats["speed"]
 
         # Attack if the player is holding space
         if keys[K_SPACE]:
@@ -139,6 +162,13 @@ class Player(sprite.Sprite):
         if keys[K_q]:
             self.attacking = True
             self.attack_timer = time.get_ticks()
+
+        if keys[K_w] and self.able_to_switch:
+            self.able_to_switch = False
+            self.switch_timer = time.get_ticks()
+            self.weapon_selected = (self.weapon_selected + 1) % len(WEAPON)
+            self.weapon = list(WEAPON.keys())[self.weapon_selected]
+            self.needs_save = True
 
     def get_state(self) -> None:
         # Idle if the player is not moving
@@ -165,10 +195,10 @@ class Player(sprite.Sprite):
             self.direction = self.direction.normalize()
 
         # Move the player horizontally and check for collisions
-        self.hitbox.x += self.direction.x * speed
+        self.hitbox.x += self.direction.x * speed * self.game.delta_time
         self.collide("horizontal")
         # Move the player vertically and check for collisions
-        self.hitbox.y += self.direction.y * speed
+        self.hitbox.y += self.direction.y * speed * self.game.delta_time
         self.collide("vertical")
 
         self.rect.center = self.hitbox.center
@@ -202,3 +232,7 @@ class Player(sprite.Sprite):
             if current_time - self.attack_timer >= self.attack_cooldown:
                 self.attacking = False
                 self.destroy_attack()
+
+        if not self.able_to_switch:
+            if current_time - self.switch_timer >= self.switch_cooldown:
+                self.able_to_switch = True

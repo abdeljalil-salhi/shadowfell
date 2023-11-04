@@ -6,6 +6,7 @@ from os import path
 from settings import *
 from debug import debug
 from src.tile import Tile
+from src.gui import GUI
 from src.player import Player
 from src.weapon import Weapon
 from src.utils import import_csv_layout, import_folder
@@ -34,16 +35,23 @@ class Level:
         self.obstacle_sprites = sprite.Group()
         self.current_attack = None
 
+        self.gui = GUI()
         self.create_map()
 
     def run(self) -> None:
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
+        self.gui.display(self.player)
 
         if DEBUG:
-            debug(f"VECTOR: {self.player.direction}")
-            debug(f"STATE: {self.player.state}", y=30)
-            debug(f"FPS: {str(int(self.game.clock.get_fps()))}", y=50)
+            width = self.display_surface.get_width()
+            debug(f"VECTOR: {self.player.direction}", x=width - 200, y=10)
+            debug(f"STATE: {self.player.state}", x=width - 200, y=30)
+            debug(
+                f"FPS: {str(int(self.game.clock.get_fps()))}",
+                x=width - 200,
+                y=50,
+            )
 
     def create_map(self) -> None:
         layouts = {
@@ -83,6 +91,7 @@ class Level:
                                 object_surface,
                             )
         self.player = Player(
+            self.game,
             self.player_data["position"],
             [self.visible_sprites],
             self.obstacle_sprites,
