@@ -8,6 +8,7 @@ from debug import debug
 from src.tile import Tile
 from src.gui import GUI
 from src.player import Player
+from src.enemy import Enemy
 from src.weapon import Weapon
 from src.utils import import_csv_layout, import_folder
 
@@ -51,6 +52,7 @@ class Level:
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
         self.gui.display(self.player)
+        self.visible_sprites.enemy_update(self.player)
 
         if DEBUG:
             width = self.display_surface.get_width()
@@ -67,6 +69,7 @@ class Level:
             "boundary": import_csv_layout("map/floor_blocks.csv"),
             "grass": import_csv_layout("map/grass_blocks.csv"),
             "object": import_csv_layout("map/object_blocks.csv"),
+            "entities": import_csv_layout("map/entities.csv"),
         }
         assets = {
             "grass": import_folder("assets/grass"),
@@ -99,15 +102,33 @@ class Level:
                                 "object",
                                 object_surface,
                             )
-        self.player = Player(
-            self.game,
-            self.player_data["position"],
-            [self.visible_sprites],
-            self.obstacle_sprites,
-            self.create_attack,
-            self.destroy_attack,
-            self.create_spell,
-        )
+                        elif style == "entities":
+                            if tile == "394":
+                                self.player = Player(
+                                    self.game,
+                                    [self.visible_sprites],
+                                    self.player_data["position"],
+                                    self.obstacle_sprites,
+                                    self.create_attack,
+                                    self.destroy_attack,
+                                    self.create_spell,
+                                )
+                            else:
+                                if tile == "390":
+                                    name = "bamboo"
+                                elif tile == "391":
+                                    name = "spirit"
+                                elif tile == "392":
+                                    name = "raccoon"
+                                elif tile == "393":
+                                    name = "squid"
+                                Enemy(
+                                    self.game,
+                                    [self.visible_sprites],
+                                    self.obstacle_sprites,
+                                    (x, y),
+                                    name,
+                                )
 
     def create_attack(self) -> None:
         self.current_attack = Weapon(self.player, [self.visible_sprites])
@@ -145,3 +166,12 @@ class FollowingCameraGroup(sprite.Group):
         for sprite in sorted(self.sprites(), key=lambda s: s.rect.centery):
             offset = sprite.rect.topleft - self.offset
             self.display_surface.blit(sprite.image, offset)
+
+    def enemy_update(self, player) -> None:
+        enemies = [
+            sprite
+            for sprite in self.sprites()
+            if hasattr(sprite, "sprite_type") and sprite.sprite_type == "enemy"
+        ]
+        for enemy in enemies:
+            enemy.enemy_update(player)

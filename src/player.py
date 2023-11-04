@@ -1,5 +1,4 @@
 from pygame import (
-    sprite,
     image,
     math,
     key,
@@ -19,21 +18,23 @@ from json import dump, load
 
 from settings import *
 from src.utils import import_folder
+from src.entity import Entity
 
 
-class Player(sprite.Sprite):
+class Player(Entity):
     def __init__(
         self,
         game,
-        position,
         groups,
+        position,
         obstacle_sprites,
         create_attack: callable,
         destroy_attack: callable,
         create_spell: callable,
     ) -> None:
-        super().__init__(groups)
+        super().__init__(groups, game)
         self.game = game
+
         self.image = transform.scale(
             image.load("assets/init/player.png").convert_alpha(),
             (TILE_SIZE, TILE_SIZE),
@@ -49,11 +50,8 @@ class Player(sprite.Sprite):
 
         self.import_player_assets()
         self.state = "down_idle"
-        self.frame = 0
-        self.animation_speed = 0.01
 
         # Player stats
-        self.direction = math.Vector2(0, 0)
 
         self.attacking = False
         self.attack_cooldown = 400
@@ -75,6 +73,7 @@ class Player(sprite.Sprite):
         self.experience = 0
 
         # Weapon stats
+
         self.create_attack = create_attack
         self.destroy_attack = destroy_attack
         self.weapon_selected = data["weapon_selected"]
@@ -84,6 +83,7 @@ class Player(sprite.Sprite):
         self.weapon_switch_cooldown = 200
 
         # Spell stats
+
         self.create_spell = create_spell
         self.spell_selected = data["spell_selected"]
         self.spell = list(SPELL.keys())[self.spell_selected]
@@ -146,7 +146,9 @@ class Player(sprite.Sprite):
         }
 
         for animation in self.animations.keys():
-            self.animations[animation] = import_folder(path + animation)
+            self.animations[animation] = import_folder(
+                path + animation, forceTransform=True
+            )
 
     def input(self) -> None:
         if self.attacking:
@@ -223,42 +225,6 @@ class Player(sprite.Sprite):
         else:
             if "attack" in self.state:
                 self.state = self.state.replace("_attack", "")
-
-    def move(self, speed: int) -> None:
-        # Normalize the direction vector to prevent faster diagonal movement
-        if self.direction.magnitude() != 0:
-            self.direction = self.direction.normalize()
-
-        # Move the player horizontally and check for collisions
-        self.hitbox.x += self.direction.x * speed * self.game.delta_time
-        self.collide("horizontal")
-        # Move the player vertically and check for collisions
-        self.hitbox.y += self.direction.y * speed * self.game.delta_time
-        self.collide("vertical")
-
-        self.rect.center = self.hitbox.center
-
-    def collide(self, direction) -> None:
-        if direction == "horizontal":
-            for sprite in self.obstacle_sprites:
-                # Prevent the player from overlapping with the obstacle
-                if sprite.hitbox.colliderect(self.hitbox):
-                    # If the player is moving right, set the player's right side to the left side of the object it hit
-                    if self.direction.x > 0:
-                        self.hitbox.right = sprite.hitbox.left
-                    # If the player is moving left, set the player's left side to the right side of the object it hit
-                    elif self.direction.x < 0:
-                        self.hitbox.left = sprite.hitbox.right
-        elif direction == "vertical":
-            for sprite in self.obstacle_sprites:
-                # Prevent the player from overlapping with the obstacle
-                if sprite.hitbox.colliderect(self.hitbox):
-                    # If the player is moving down, set the player's bottom side to the top side of the object it hit
-                    if self.direction.y > 0:
-                        self.hitbox.bottom = sprite.hitbox.top
-                    # If the player is moving up, set the player's top side to the bottom side of the object it hit
-                    elif self.direction.y < 0:
-                        self.hitbox.top = sprite.hitbox.bottom
 
     def cooldown(self) -> None:
         current_time = time.get_ticks()

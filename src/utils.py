@@ -15,7 +15,7 @@ def import_csv_layout(path) -> list:
     return level_map
 
 
-def import_folder(path, isObject=False) -> list:
+def import_folder(path, isObject=False, forceTransform=False) -> list:
     surface_list = []
     filenames = []
     for _, _, files in walk(path):
@@ -38,7 +38,7 @@ def import_folder(path, isObject=False) -> list:
                 image_surface = transform.scale(
                     image_surface, (TILE_SIZE * 2, TILE_SIZE * 2)
                 )
-        else:
+        elif forceTransform:
             image_surface = transform.scale(image_surface, (TILE_SIZE, TILE_SIZE))
         surface_list.append(image_surface)
 

@@ -71,3 +71,52 @@ HEALTH_BAR_COLOR = "#d50000"
 MANA_BAR_COLOR = "#304ffe"
 STAMINA_BAR_COLOR = "#00c853"
 GUI_BORDER_COLOR_ACTIVE = "#ffea00"
+
+# Enemy settings
+
+ENEMY = {
+    "squid": {
+        "health": 100,
+        "experience": 100,
+        "attack": "slash",
+        "attack_damage": 20,
+        "attack_sound": "assets/audio/attack/slash.wav",
+        "speed": 0.18,
+        "resistance": 3,
+        "attack_radius": 80,
+        "notice_radius": 360,
+    },
+    "raccoon": {
+        "health": 300,
+        "experience": 250,
+        "attack": "claw",
+        "attack_damage": 40,
+        "attack_sound": "assets/audio/attack/claw.wav",
+        "speed": 0.1,
+        "resistance": 3,
+        "attack_radius": 120,
+        "notice_radius": 400,
+    },
+    "spirit": {
+        "health": 100,
+        "experience": 110,
+        "attack": "thunder",
+        "attack_damage": 8,
+        "attack_sound": "assets/audio/attack/fireball.wav",
+        "speed": 0.25,
+        "resistance": 3,
+        "attack_radius": 60,
+        "notice_radius": 300,
+    },
+    "bamboo": {
+        "health": 70,
+        "experience": 120,
+        "attack": "leaf_attack",
+        "attack_damage": 6,
+        "attack_sound": "assets/audio/attack/slash.wav",
+        "speed": 0.15,
+        "resistance": 3,
+        "attack_radius": 50,
+        "notice_radius": 150,
+    },
+}
