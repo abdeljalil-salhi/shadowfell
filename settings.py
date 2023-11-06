@@ -14,7 +14,7 @@ DEBUG = True
 PLAYER = {
     "health": 100,
     "mana": 100,
-    "stamina": 100,
+    "stamina": 50,
     "armor": 0,
     "attack_damage": 10,
     "ability_power": 4,

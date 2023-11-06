@@ -14,6 +14,7 @@ class ParticleEffect(sprite.Sprite):
         self.frames = frames
         self.image = self.frames[self.frame]
         self.rect = self.image.get_rect(center=position)
+        self.sprite_type = "spell"
 
     def update(self) -> None:
         self.animate()

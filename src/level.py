@@ -10,6 +10,7 @@ from src.gui import GUI
 from src.player import Player
 from src.enemy import Enemy
 from src.weapon import Weapon
+from src.spells import Spells
 from src.particles import AnimationPlayer
 from src.utils import import_csv_layout, import_folder
 
@@ -50,6 +51,7 @@ class Level:
 
         self.gui = GUI()
         self.animation_player = AnimationPlayer()
+        self.spells = Spells(self.game, self.animation_player)
         self.create_map()
 
     def run(self) -> None:
@@ -152,7 +154,13 @@ class Level:
             self.current_attack = None
 
     def create_spell(self, spell: str, efficiency: int, cost: int) -> None:
-        pass
+        if spell == "heal":
+            self.spells.heal(self.player, efficiency, cost, [self.visible_sprites])
+
+        elif spell == "flame":
+            self.spells.flame(
+                self.player, cost, [self.visible_sprites, self.attack_sprites]
+            )
 
     def player_attack_logic(self) -> None:
         if self.attack_sprites:

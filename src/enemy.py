@@ -136,8 +136,8 @@ class Enemy(Entity):
 
         if attack_type == "weapon":
             self.health -= player.get_attack_damage()
-        else:
-            pass
+        elif attack_type == "spell":
+            self.health -= player.get_ability_power()
 
         self.attacked_timer = time.get_ticks()
         self.can_be_attacked = False

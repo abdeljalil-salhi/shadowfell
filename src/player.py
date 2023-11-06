@@ -103,6 +103,7 @@ class Player(Entity):
         self.get_state()
         self.animate()
         self.move(self.speed)
+        self.regeneration()
         self.save()
 
     def save(self) -> None:
@@ -184,8 +185,9 @@ class Player(Entity):
             self.direction.x = 0
 
         # Sprint if the player is holding shift
-        if keys[K_LSHIFT]:
+        if keys[K_LSHIFT] and self.stamina > 0 and self.direction.magnitude() != 0:
             self.speed = self.initial_speed * 1.5
+            self.stamina -= 0.1
         else:
             self.speed = self.initial_speed
 
@@ -241,6 +243,20 @@ class Player(Entity):
 
     def get_attack_damage(self) -> int:
         return self.attack_damage + WEAPON[self.weapon]["damage"]
+
+    def get_ability_power(self) -> int:
+        return self.ability_power + SPELL[self.spell]["efficiency"]
+
+    def regeneration(self) -> None:
+        if self.mana < self.max_mana:
+            self.mana += 0.007 * self.ability_power
+        else:
+            self.mana = self.max_mana
+
+        if self.stamina < self.max_stamina:
+            self.stamina += 0.02 * (self.armor == 0 and 1 or self.armor)
+        else:
+            self.stamina = self.max_stamina
 
     def cooldown(self) -> None:
         current_time = time.get_ticks()
