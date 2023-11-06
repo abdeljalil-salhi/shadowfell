@@ -10,6 +10,7 @@ class Weapon(sprite.Sprite):
         self.image = image.load(
             f"assets/weapons/{player.weapon}/{direction}.png"
         ).convert_alpha()
+        self.sprite_type = "weapon"
 
         if direction == "up":
             self.rect = self.image.get_rect(

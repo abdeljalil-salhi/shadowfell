@@ -11,6 +11,16 @@ DEBUG = True
 
 # Player settings
 
+PLAYER = {
+    "health": 100,
+    "mana": 100,
+    "stamina": 100,
+    "armor": 0,
+    "attack_damage": 10,
+    "ability_power": 4,
+    "speed": 0.4,
+}
+
 WEAPON = {
     "sword": {
         "cooldown": 100,

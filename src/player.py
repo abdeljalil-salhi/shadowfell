@@ -57,19 +57,19 @@ class Player(Entity):
         self.attack_cooldown = 400
         self.attack_timer = None
 
-        self.health, self.max_health = data["health"] * 0.5, data["health"]
-        self.mana, self.max_mana = data["mana"] * 0.8, data["mana"]
-        self.stamina, self.max_stamina = data["stamina"] * 0.9, data["stamina"]
-        self.armor, self.initial_armor = data["armor"], data["armor"]
+        self.health, self.max_health = data["health"], PLAYER["health"]
+        self.mana, self.max_mana = data["mana"], PLAYER["mana"]
+        self.stamina, self.max_stamina = data["stamina"], PLAYER["stamina"]
+        self.armor, self.initial_armor = data["armor"], PLAYER["armor"]
         self.attack_damage, self.initial_attack_damage = (
             data["attack_damage"],
-            data["attack_damage"],
+            PLAYER["attack_damage"],
         )
         self.ability_power, self.initial_ability_power = (
             data["ability_power"],
-            data["ability_power"],
+            PLAYER["ability_power"],
         )
-        self.speed, self.initial_speed = data["speed"], data["speed"]
+        self.speed, self.initial_speed = data["speed"], PLAYER["speed"]
         self.experience = 0
 
         # Weapon stats
@@ -90,6 +90,12 @@ class Player(Entity):
         self.able_to_switch_spell = True
         self.spell_switch_timer = None
         self.spell_switch_cooldown = 200
+
+        # Fight logic
+
+        self.can_be_attacked = True
+        self.attacked_cooldown = 800
+        self.attacked_timer = None
 
     def update(self) -> None:
         self.input()
@@ -122,11 +128,18 @@ class Player(Entity):
 
     def animate(self) -> None:
         animation = self.animations[self.state]
+
         self.frame += self.animation_speed * self.game.delta_time
         if self.frame >= len(animation):
             self.frame = 0
+
         self.image = animation[int(self.frame)]
         self.rect = self.image.get_rect(center=self.hitbox.center)
+
+        if not self.can_be_attacked:
+            self.image.set_alpha(self.wave_value())
+        else:
+            self.image.set_alpha(255)
 
     def import_player_assets(self) -> None:
         path = "assets/player/"
@@ -226,11 +239,17 @@ class Player(Entity):
             if "attack" in self.state:
                 self.state = self.state.replace("_attack", "")
 
+    def get_attack_damage(self) -> int:
+        return self.attack_damage + WEAPON[self.weapon]["damage"]
+
     def cooldown(self) -> None:
         current_time = time.get_ticks()
 
         if self.attacking:
-            if current_time - self.attack_timer >= self.attack_cooldown:
+            if (
+                current_time - self.attack_timer
+                >= self.attack_cooldown + WEAPON[self.weapon]["cooldown"]
+            ):
                 self.attacking = False
                 self.destroy_attack()
 
@@ -241,3 +260,7 @@ class Player(Entity):
         if not self.able_to_switch_spell:
             if current_time - self.spell_switch_timer >= self.spell_switch_cooldown:
                 self.able_to_switch_spell = True
+
+        if not self.can_be_attacked:
+            if current_time - self.attacked_timer >= self.attacked_cooldown:
+                self.can_be_attacked = True

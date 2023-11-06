@@ -1,4 +1,5 @@
-from pygame import sprite, math
+from pygame import sprite, math, time
+from math import sin
 
 
 class Entity(sprite.Sprite):
@@ -45,3 +46,9 @@ class Entity(sprite.Sprite):
                     # If the player is moving up, set the player's top side to the bottom side of the object it hit
                     elif self.direction.y < 0:
                         self.hitbox.top = sprite.hitbox.bottom
+
+    def wave_value(self) -> int:
+        if sin(time.get_ticks()) >= 0:
+            return 255
+        else:
+            return 0

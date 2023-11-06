@@ -1,4 +1,4 @@
-from pygame import display, sprite, math, image
+from pygame import display, sprite, math, image, time
 from random import choice
 from json import dump, load
 from os import path
@@ -23,13 +23,13 @@ class Level:
                     "position": (2000, 1430),
                     "weapon_selected": 0,
                     "spell_selected": 0,
-                    "health": 100,
-                    "mana": 100,
-                    "stamina": 100,
-                    "armor": 0,
-                    "attack_damage": 10,
-                    "ability_power": 4,
-                    "speed": 0.4,
+                    "health": PLAYER["health"],
+                    "mana": PLAYER["mana"],
+                    "stamina": PLAYER["stamina"],
+                    "armor": PLAYER["armor"],
+                    "attack_damage": PLAYER["attack_damage"],
+                    "ability_power": PLAYER["ability_power"],
+                    "speed": PLAYER["speed"],
                     "experience": 0,
                 }
                 dump(
@@ -43,6 +43,8 @@ class Level:
         self.display_surface = display.get_surface()
         self.visible_sprites = FollowingCameraGroup()
         self.obstacle_sprites = sprite.Group()
+        self.attack_sprites = sprite.Group()
+        self.attackable_sprites = sprite.Group()
         self.current_attack = None
 
         self.gui = GUI()
@@ -52,6 +54,7 @@ class Level:
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
         self.gui.display(self.player)
+        self.player_attack_logic()
         self.visible_sprites.enemy_update(self.player)
 
         if DEBUG:
@@ -90,7 +93,11 @@ class Level:
                             random_grass = choice(assets["grass"])
                             Tile(
                                 (x, y),
-                                [self.visible_sprites, self.obstacle_sprites],
+                                [
+                                    self.visible_sprites,
+                                    self.obstacle_sprites,
+                                    self.attackable_sprites,
+                                ],
                                 "grass",
                                 random_grass,
                             )
@@ -124,14 +131,17 @@ class Level:
                                     name = "squid"
                                 Enemy(
                                     self.game,
-                                    [self.visible_sprites],
+                                    [self.visible_sprites, self.attackable_sprites],
                                     self.obstacle_sprites,
                                     (x, y),
                                     name,
+                                    self.player_damage_logic,
                                 )
 
     def create_attack(self) -> None:
-        self.current_attack = Weapon(self.player, [self.visible_sprites])
+        self.current_attack = Weapon(
+            self.player, [self.visible_sprites, self.attack_sprites]
+        )
 
     def destroy_attack(self) -> None:
         if self.current_attack:
@@ -140,6 +150,29 @@ class Level:
 
     def create_spell(self, spell: str, efficiency: int, cost: int) -> None:
         pass
+
+    def player_attack_logic(self) -> None:
+        if self.attack_sprites:
+            for attack_sprite in self.attack_sprites:
+                sprites_collided = sprite.spritecollide(
+                    attack_sprite, self.attackable_sprites, False
+                )
+                if sprites_collided:
+                    for target_sprite in sprites_collided:
+                        if target_sprite.sprite_type == "grass":
+                            target_sprite.kill()
+                        else:
+                            target_sprite.take_damage(
+                                self.player, attack_sprite.sprite_type
+                            )
+
+    def player_damage_logic(self, amount: int, attack: str) -> None:
+        if self.player.can_be_attacked and self.player.health > 5:
+            self.player.health -= amount
+            if self.player.health < 5:
+                self.player.health = 5
+            self.player.can_be_attacked = False
+            self.player.attacked_timer = time.get_ticks()
 
 
 class FollowingCameraGroup(sprite.Group):
