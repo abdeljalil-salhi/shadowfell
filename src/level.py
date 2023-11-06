@@ -1,5 +1,5 @@
 from pygame import display, sprite, math, image, time
-from random import choice
+from random import choice, randint
 from json import dump, load
 from os import path
 
@@ -10,6 +10,7 @@ from src.gui import GUI
 from src.player import Player
 from src.enemy import Enemy
 from src.weapon import Weapon
+from src.particles import AnimationPlayer
 from src.utils import import_csv_layout, import_folder
 
 
@@ -48,6 +49,7 @@ class Level:
         self.current_attack = None
 
         self.gui = GUI()
+        self.animation_player = AnimationPlayer()
         self.create_map()
 
     def run(self) -> None:
@@ -136,6 +138,7 @@ class Level:
                                     (x, y),
                                     name,
                                     self.player_damage_logic,
+                                    self.spawn_death_particles,
                                 )
 
     def create_attack(self) -> None:
@@ -160,6 +163,13 @@ class Level:
                 if sprites_collided:
                     for target_sprite in sprites_collided:
                         if target_sprite.sprite_type == "grass":
+                            offset = target_sprite.rect.center - math.Vector2(0, 50)
+                            for _ in range(randint(3, 6)):
+                                self.animation_player.spawn_grass_particles(
+                                    self.game,
+                                    offset,
+                                    [self.visible_sprites],
+                                )
                             target_sprite.kill()
                         else:
                             target_sprite.take_damage(
@@ -167,12 +177,20 @@ class Level:
                             )
 
     def player_damage_logic(self, amount: int, attack: str) -> None:
-        if self.player.can_be_attacked and self.player.health > 5:
+        if self.player.can_be_attacked:
             self.player.health -= amount
-            if self.player.health < 5:
-                self.player.health = 5
+            if self.player.health < 0:
+                self.player.health = 0
             self.player.can_be_attacked = False
             self.player.attacked_timer = time.get_ticks()
+            self.animation_player.spawn_particles(
+                self.game, attack, self.player.rect.center, [self.visible_sprites]
+            )
+
+    def spawn_death_particles(self, position: tuple, name: str) -> None:
+        self.animation_player.spawn_particles(
+            self.game, name, position, [self.visible_sprites]
+        )
 
 
 class FollowingCameraGroup(sprite.Group):

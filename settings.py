@@ -126,7 +126,7 @@ ENEMY = {
         "attack_sound": "assets/audio/attack/slash.wav",
         "speed": 0.15,
         "resistance": 3,
-        "attack_radius": 50,
+        "attack_radius": 60,
         "notice_radius": 150,
     },
 }

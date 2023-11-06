@@ -7,7 +7,14 @@ from src.utils import import_folder
 
 class Enemy(Entity):
     def __init__(
-        self, game, groups, obstacle_sprites, position, name, damage_player
+        self,
+        game,
+        groups,
+        obstacle_sprites,
+        position,
+        name,
+        damage_player: callable,
+        spawn_death_particles: callable,
     ) -> None:
         super().__init__(groups, game)
         self.game = game
@@ -41,6 +48,7 @@ class Enemy(Entity):
         self.attack_cooldown = 400
         self.attack_timer = None
         self.damage_player = damage_player
+        self.spawn_death_particles = spawn_death_particles
 
         self.can_be_attacked = True
         self.attacked_cooldown = 500
@@ -114,7 +122,7 @@ class Enemy(Entity):
                 self.frame = 0
             self.state = "attack"
 
-        elif 50 <= distance <= self.notice_radius:
+        elif distance <= self.notice_radius:
             self.state = "move"
 
         else:
@@ -137,6 +145,7 @@ class Enemy(Entity):
     def check_death(self) -> None:
         if self.health <= 0:
             self.kill()
+            self.spawn_death_particles(self.rect.center, self.name)
 
     def attacked(self) -> None:
         if not self.can_be_attacked:

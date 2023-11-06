@@ -15,14 +15,14 @@ def import_csv_layout(path) -> list:
     return level_map
 
 
-def import_folder(path, isObject=False, forceTransform=False) -> list:
+def import_folder(path, isObject=False, forceTransform=False, isParticle=False) -> list:
     surface_list = []
     filenames = []
     for _, _, files in walk(path):
         for filename in files:
             filenames.append(filename)
 
-    if isObject:
+    if isObject or isParticle:
         # Sort the filenames numerically
         filenames.sort(key=lambda x: int(x.split(".")[0]))
 
