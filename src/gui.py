@@ -1,4 +1,4 @@
-from pygame import display, font, Rect, draw, image, transform
+from pygame import display, font, Rect, draw, image, time
 
 from settings import *
 
@@ -31,6 +31,13 @@ class GUI:
                 image.load(spell["asset"]).convert_alpha(),
             )
 
+        # Tooltip settings
+        self.tooltip_display = False
+        self.tooltip_timer = None
+        self.tooltip_duration = 1000
+        self.tooltip_text = None
+        self.tooltip_position = None
+
     def display(self, player) -> None:
         self.display_bar(
             player.health,
@@ -52,6 +59,15 @@ class GUI:
 
         self.weapon_overlay(player.weapon_selected, not player.able_to_switch_weapon)
         self.spell_overlay(player.spell_selected, not player.able_to_switch_spell)
+
+        if self.tooltip_display:
+            self.display_tooltip(
+                self.tooltip_text,
+                *self.tooltip_position,
+            )
+            if time.get_ticks() - self.tooltip_timer >= self.tooltip_duration:
+                self.tooltip_display = False
+                self.tooltip_text = None
 
     def display_bar(self, current, max_amount, background_rect, color) -> None:
         draw.rect(
@@ -83,6 +99,30 @@ class GUI:
                 self.display_surface.get_width() - 20,
                 self.display_surface.get_height() - 20,
             )
+        )
+        draw.rect(
+            self.display_surface,
+            GUI_BACKGROUND_COLOR,
+            text_rect.inflate(20, 10),
+        )
+        self.display_surface.blit(text_surface, text_rect)
+        draw.rect(
+            self.display_surface,
+            GUI_BORDER_COLOR,
+            text_rect.inflate(20, 10),
+            3,
+        )
+
+    def display_tooltip(self, text: str, x: int, y: int) -> None:
+        if self.tooltip_text != text:
+            self.tooltip_timer = time.get_ticks()
+            self.tooltip_text = text
+            self.tooltip_position = (x, y)
+            self.tooltip_display = True
+
+        text_surface = self.font.render(text, False, GUI_TEXT_COLOR)
+        text_rect = text_surface.get_rect(
+            center=(x, y),
         )
         draw.rect(
             self.display_surface,

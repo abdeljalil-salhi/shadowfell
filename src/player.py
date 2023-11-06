@@ -143,7 +143,6 @@ class Player(Entity):
             self.image.set_alpha(255)
 
     def import_player_assets(self) -> None:
-        path = "assets/player/"
         self.animations = {
             "up": [],
             "down": [],
@@ -161,7 +160,7 @@ class Player(Entity):
 
         for animation in self.animations.keys():
             self.animations[animation] = import_folder(
-                path + animation, forceTransform=True
+                f"assets/player/{animation}", forceTransform=True
             )
 
     def input(self) -> None:

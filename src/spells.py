@@ -1,4 +1,4 @@
-from pygame import math
+from pygame import math, display
 from random import randint
 
 from settings import *
@@ -8,9 +8,15 @@ class Spells:
     def __init__(self, game, animation_player) -> None:
         self.game = game
         self.animation_player = animation_player
+        self.display_surface = display.get_surface()
 
     def heal(self, player, efficiency, cost, groups) -> None:
         if player.mana < cost or player.health == player.max_health:
+            self.game.level.gui.display_tooltip(
+                "Not enough mana" if player.mana < cost else "Health is full",
+                self.display_surface.get_width() // 2,
+                self.display_surface.get_height() - 100,
+            )
             return
         player.mana -= cost
 
@@ -33,6 +39,11 @@ class Spells:
 
     def flame(self, player, cost, groups) -> None:
         if player.mana < cost:
+            self.game.level.gui.display_tooltip(
+                "Not enough mana",
+                self.display_surface.get_width() // 2,
+                self.display_surface.get_height() - 100,
+            )
             return
         player.mana -= cost
 
