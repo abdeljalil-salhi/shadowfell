@@ -15,6 +15,7 @@ class Enemy(Entity):
         name,
         damage_player: callable,
         spawn_death_particles: callable,
+        gain_experience: callable,
     ) -> None:
         super().__init__(groups, game)
         self.game = game
@@ -42,13 +43,15 @@ class Enemy(Entity):
         self.attack_radius = data["attack_radius"]
         self.notice_radius = data["notice_radius"]
 
+        self.damage_player = damage_player
+        self.spawn_death_particles = spawn_death_particles
+        self.gain_experience = gain_experience
+
         # Fight logic
 
         self.able_to_attack = True
         self.attack_cooldown = 400
         self.attack_timer = None
-        self.damage_player = damage_player
-        self.spawn_death_particles = spawn_death_particles
 
         self.can_be_attacked = True
         self.attacked_cooldown = 500
@@ -146,6 +149,7 @@ class Enemy(Entity):
         if self.health <= 0:
             self.kill()
             self.spawn_death_particles(self.rect.center, self.name)
+            self.gain_experience(self.experience)
 
     def attacked(self) -> None:
         if not self.can_be_attacked:

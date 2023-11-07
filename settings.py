@@ -21,6 +21,26 @@ PLAYER = {
     "speed": 0.4,
 }
 
+MAX_STATS = {
+    "health": 300,
+    "mana": 250,
+    "stamina": 80,
+    "armor": 30,
+    "attack_damage": 50,
+    "ability_power": 40,
+    "speed": 1,
+}
+
+UPGRADE_COST = {
+    "health": 100,
+    "mana": 100,
+    "stamina": 100,
+    "armor": 100,
+    "attack_damage": 100,
+    "ability_power": 100,
+    "speed": 100,
+}
+
 WEAPON = {
     "sword": {
         "cooldown": 100,
@@ -87,7 +107,7 @@ GUI_BORDER_COLOR_ACTIVE = "#ffea00"
 ENEMY = {
     "squid": {
         "health": 100,
-        "experience": 100,
+        "experience": 5,
         "attack": "slash",
         "attack_damage": 20,
         "attack_sound": "assets/audio/attack/slash.wav",
@@ -98,7 +118,7 @@ ENEMY = {
     },
     "raccoon": {
         "health": 300,
-        "experience": 250,
+        "experience": 20,
         "attack": "claw",
         "attack_damage": 40,
         "attack_sound": "assets/audio/attack/claw.wav",
@@ -109,7 +129,7 @@ ENEMY = {
     },
     "spirit": {
         "health": 100,
-        "experience": 110,
+        "experience": 8,
         "attack": "thunder",
         "attack_damage": 8,
         "attack_sound": "assets/audio/attack/fireball.wav",
@@ -120,7 +140,7 @@ ENEMY = {
     },
     "bamboo": {
         "health": 70,
-        "experience": 120,
+        "experience": 7,
         "attack": "leaf_attack",
         "attack_damage": 6,
         "attack_sound": "assets/audio/attack/slash.wav",

@@ -38,6 +38,11 @@ class GUI:
         self.tooltip_text = None
         self.tooltip_position = None
 
+        # Level up settings
+        self.level_up_display = False
+        self.level_up_timer = None
+        self.level_up_duration = 2000
+
     def display(self, player) -> None:
         self.display_bar(
             player.health,
@@ -55,6 +60,7 @@ class GUI:
             STAMINA_BAR_COLOR,
         )
 
+        self.display_level(player.level)
         self.display_experience(player.experience)
 
         self.weapon_overlay(player.weapon_selected, not player.able_to_switch_weapon)
@@ -66,8 +72,12 @@ class GUI:
                 *self.tooltip_position,
             )
             if time.get_ticks() - self.tooltip_timer >= self.tooltip_duration:
-                self.tooltip_display = False
-                self.tooltip_text = None
+                self.tooltip_display, self.tooltip_text = False, None
+
+        if self.level_up_display:
+            self.level_up()
+            if time.get_ticks() - self.level_up_timer >= self.level_up_duration:
+                self.level_up_display, self.level_up_timer = False, None
 
     def display_bar(self, current, max_amount, background_rect, color) -> None:
         draw.rect(
@@ -89,6 +99,27 @@ class GUI:
             self.display_surface,
             GUI_BORDER_COLOR,
             background_rect,
+            3,
+        )
+
+    def display_level(self, level) -> None:
+        text_surface = self.font.render(f"LVL {level}", False, GUI_TEXT_COLOR)
+        text_rect = text_surface.get_rect(
+            bottomleft=(
+                20,
+                100,
+            )
+        )
+        draw.rect(
+            self.display_surface,
+            GUI_BACKGROUND_COLOR,
+            text_rect.inflate(20, 10),
+        )
+        self.display_surface.blit(text_surface, text_rect)
+        draw.rect(
+            self.display_surface,
+            GUI_BORDER_COLOR,
+            text_rect.inflate(20, 10),
             3,
         )
 
@@ -183,3 +214,16 @@ class GUI:
             center=background_rect.center,
         )
         self.display_surface.blit(spell_surface, spell_rect)
+
+    def level_up(self) -> None:
+        if not self.level_up_display:
+            self.level_up_display = True
+            self.level_up_timer = time.get_ticks()
+
+        self.display_surface.blit(
+            self.font.render("LEVEL UP!", False, GUI_TEXT_COLOR),
+            (
+                self.display_surface.get_width() // 2 - 60,
+                self.display_surface.get_height() // 2 - 60,
+            ),
+        )

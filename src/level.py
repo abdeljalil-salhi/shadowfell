@@ -25,6 +25,7 @@ class Level:
                     "position": (2000, 1430),
                     "weapon_selected": 0,
                     "spell_selected": 0,
+                    "level": 1,
                     "health": PLAYER["health"],
                     "mana": PLAYER["mana"],
                     "stamina": PLAYER["stamina"],
@@ -141,6 +142,7 @@ class Level:
                                     name,
                                     self.player_damage_logic,
                                     self.spawn_death_particles,
+                                    self.gain_experience,
                                 )
 
     def create_attack(self) -> None:
@@ -199,6 +201,32 @@ class Level:
         self.animation_player.spawn_particles(
             self.game, name, position, [self.visible_sprites]
         )
+
+    def gain_experience(self, amount: int) -> None:
+        self.player.experience += amount
+        if self.player.experience >= self.player.max_experience:
+            self.player.experience -= self.player.max_experience
+            self.player.level += 1
+            self.player.max_experience += 100
+            self.player.max_health += 10
+            self.player.health = self.player.max_health
+            self.player.max_mana += 10
+            self.player.mana = self.player.max_mana
+            self.player.max_stamina += 10
+            self.player.stamina = self.player.max_stamina
+            self.player.armor += 1
+            self.player.attack_damage += 1
+            self.player.ability_power += 1
+            self.player.speed += 0.03
+            # self.player.level_up_timer = time.get_ticks()
+            self.animation_player.spawn_particles(
+                self.game,
+                "aura",
+                self.player.rect.center,
+                [self.visible_sprites],
+            )
+            self.game.level.gui.level_up()
+        self.player.needs_save = True
 
 
 class FollowingCameraGroup(sprite.Group):

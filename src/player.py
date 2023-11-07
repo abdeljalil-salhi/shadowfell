@@ -57,6 +57,7 @@ class Player(Entity):
         self.attack_cooldown = 400
         self.attack_timer = None
 
+        self.level = data["level"]
         self.health, self.max_health = data["health"], PLAYER["health"]
         self.mana, self.max_mana = data["mana"], PLAYER["mana"]
         self.stamina, self.max_stamina = data["stamina"], PLAYER["stamina"]
@@ -70,7 +71,7 @@ class Player(Entity):
             PLAYER["ability_power"],
         )
         self.speed, self.initial_speed = data["speed"], PLAYER["speed"]
-        self.experience = 0
+        self.experience, self.max_experience = data["experience"], 100 * self.level
 
         # Weapon stats
 
@@ -114,6 +115,7 @@ class Player(Entity):
                         "position": self.rect.topleft,
                         "weapon_selected": self.weapon_selected,
                         "spell_selected": self.spell_selected,
+                        "level": self.level,
                         "health": self.health,
                         "mana": self.mana,
                         "stamina": self.stamina,
