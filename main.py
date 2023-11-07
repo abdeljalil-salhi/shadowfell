@@ -9,6 +9,8 @@ from pygame import (
     FULLSCREEN as FS,
     KEYDOWN,
     K_ESCAPE,
+    K_p,
+    mixer,
 )
 from sys import exit
 
@@ -30,14 +32,20 @@ class Game:
 
         self.level = Level(self)
 
+        backgound_music = mixer.Sound("assets/sounds/main.ogg")
+        backgound_music.play(-1)
+
     def run(self) -> None:
         while True:
             for e in event.get():
                 if e.type == QUIT or (e.type == KEYDOWN and e.key == K_ESCAPE):
                     quit()
                     exit()
+                elif e.type == KEYDOWN:
+                    if e.key == K_p:
+                        self.level.toggle_menu()
 
-            self.screen.fill((113, 221, 238))
+            self.screen.fill(WATER_COLOR)
             self.level.run()
             display.update()
             self.delta_time = self.clock.tick(FPS)

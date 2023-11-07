@@ -13,6 +13,7 @@ from pygame import (
     K_e,
     transform,
     time,
+    mixer,
 )
 from json import dump, load
 
@@ -40,7 +41,7 @@ class Player(Entity):
             (TILE_SIZE, TILE_SIZE),
         )
         self.rect = self.image.get_rect(topleft=position)
-        self.hitbox = self.rect.inflate(0, -26)
+        self.hitbox = self.rect.inflate(-6, HITBOX_OFFSET["player"])
         self.needs_save = False
 
         with open("data/player.json", "r") as file:
@@ -58,20 +59,34 @@ class Player(Entity):
         self.attack_timer = None
 
         self.level = data["level"]
-        self.health, self.max_health = data["health"], PLAYER["health"]
-        self.mana, self.max_mana = data["mana"], PLAYER["mana"]
-        self.stamina, self.max_stamina = data["stamina"], PLAYER["stamina"]
-        self.armor, self.initial_armor = data["armor"], PLAYER["armor"]
-        self.attack_damage, self.initial_attack_damage = (
-            data["attack_damage"],
-            PLAYER["attack_damage"],
-        )
-        self.ability_power, self.initial_ability_power = (
-            data["ability_power"],
-            PLAYER["ability_power"],
-        )
-        self.speed, self.initial_speed = data["speed"], PLAYER["speed"]
         self.experience, self.max_experience = data["experience"], 100 * self.level
+        self.stats = {
+            "health": data["health"],
+            "mana": data["mana"],
+            "stamina": data["stamina"],
+            "armor": data["armor"],
+            "attack_damage": data["attack_damage"],
+            "ability_power": data["ability_power"],
+            "speed": data["speed"],
+        }
+        self.initial_stats = {
+            "health": PLAYER["health"],
+            "mana": PLAYER["mana"],
+            "stamina": PLAYER["stamina"],
+            "armor": PLAYER["armor"],
+            "attack_damage": PLAYER["attack_damage"],
+            "ability_power": PLAYER["ability_power"],
+            "speed": PLAYER["speed"],
+        }
+        self.upgrade_costs = {
+            "health": 100,
+            "mana": 100,
+            "stamina": 100,
+            "armor": 100,
+            "attack_damage": 100,
+            "ability_power": 100,
+            "speed": 100,
+        }
 
         # Weapon stats
 
@@ -82,6 +97,8 @@ class Player(Entity):
         self.able_to_switch_weapon = True
         self.weapon_switch_timer = None
         self.weapon_switch_cooldown = 200
+        self.weapon_attack_sound = mixer.Sound("assets/sounds/sword.wav")
+        self.weapon_attack_sound.set_volume(0.4)
 
         # Spell stats
 
@@ -103,7 +120,7 @@ class Player(Entity):
         self.cooldown()
         self.get_state()
         self.animate()
-        self.move(self.speed)
+        self.move(self.stats["speed"])
         self.regeneration()
         self.save()
 
@@ -116,13 +133,13 @@ class Player(Entity):
                         "weapon_selected": self.weapon_selected,
                         "spell_selected": self.spell_selected,
                         "level": self.level,
-                        "health": self.health,
-                        "mana": self.mana,
-                        "stamina": self.stamina,
-                        "armor": self.armor,
-                        "attack_damage": self.attack_damage,
-                        "ability_power": self.ability_power,
-                        "speed": self.speed,
+                        "health": self.stats["health"],
+                        "mana": self.stats["mana"],
+                        "stamina": self.stats["stamina"],
+                        "armor": self.stats["armor"],
+                        "attack_damage": self.stats["attack_damage"],
+                        "ability_power": self.stats["ability_power"],
+                        "speed": self.stats["speed"],
                         "experience": self.experience,
                     },
                     file,
@@ -186,17 +203,22 @@ class Player(Entity):
             self.direction.x = 0
 
         # Sprint if the player is holding shift
-        if keys[K_LSHIFT] and self.stamina > 0 and self.direction.magnitude() != 0:
-            self.speed = self.initial_speed * 1.5
-            self.stamina -= 0.1
+        if (
+            keys[K_LSHIFT]
+            and self.stats["stamina"] > 0
+            and self.direction.magnitude() != 0
+        ):
+            self.stats["speed"] = self.initial_stats["speed"] * 1.5
+            self.stats["stamina"] -= 0.1
         else:
-            self.speed = self.initial_speed
+            self.stats["speed"] = self.initial_stats["speed"]
 
         # Attack if the player is holding space
         if keys[K_SPACE]:
             self.attacking = True
             self.attack_timer = time.get_ticks()
             self.create_attack()
+            self.weapon_attack_sound.play()
 
         # Cast a spell if the player is holding Q
         if keys[K_q]:
@@ -205,7 +227,7 @@ class Player(Entity):
             self.create_spell(
                 list(SPELL.keys())[self.spell_selected],
                 list(SPELL.values())[self.spell_selected]["efficiency"]
-                + self.ability_power,
+                + self.stats["ability_power"],
                 list(SPELL.values())[self.spell_selected]["cost"],
             )
 
@@ -243,21 +265,23 @@ class Player(Entity):
                 self.state = self.state.replace("_attack", "")
 
     def get_attack_damage(self) -> int:
-        return self.attack_damage + WEAPON[self.weapon]["damage"]
+        return self.stats["attack_damage"] + WEAPON[self.weapon]["damage"]
 
     def get_ability_power(self) -> int:
-        return self.ability_power + SPELL[self.spell]["efficiency"]
+        return self.stats["ability_power"] + SPELL[self.spell]["efficiency"]
 
     def regeneration(self) -> None:
-        if self.mana < self.max_mana:
-            self.mana += 0.007 * self.ability_power
+        if self.stats["mana"] < self.initial_stats["mana"]:
+            self.stats["mana"] += 0.007 * self.stats["ability_power"]
         else:
-            self.mana = self.max_mana
+            self.stats["mana"] = self.initial_stats["mana"]
 
-        if self.stamina < self.max_stamina:
-            self.stamina += 0.02 * (self.armor == 0 and 1 or self.armor)
+        if self.stats["stamina"] < self.initial_stats["stamina"]:
+            self.stats["stamina"] += 0.02 * (
+                self.stats["armor"] == 0 and 1 or self.stats["armor"]
+            )
         else:
-            self.stamina = self.max_stamina
+            self.stats["stamina"] = self.initial_stats["stamina"]
 
     def cooldown(self) -> None:
         current_time = time.get_ticks()

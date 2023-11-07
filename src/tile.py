@@ -9,6 +9,7 @@ class Tile(sprite.Sprite):
     ) -> None:
         super().__init__(groups)
         self.sprite_type = sprite_type
+        y_offset = HITBOX_OFFSET[sprite_type]
         self.image = surface
 
         if sprite_type == "object":
@@ -17,4 +18,4 @@ class Tile(sprite.Sprite):
             self.rect = self.image.get_rect(topleft=pos)
 
         # Create a hitbox that is smaller than the tile
-        self.hitbox = self.rect.inflate(0, -10)
+        self.hitbox = self.rect.inflate(0, y_offset)

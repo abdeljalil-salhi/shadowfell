@@ -1,4 +1,4 @@
-from pygame import math, time
+from pygame import math, time, mixer
 
 from settings import *
 from src.entity import Entity
@@ -57,6 +57,14 @@ class Enemy(Entity):
         self.attacked_cooldown = 500
         self.attacked_timer = None
 
+        # Sound settings
+        self.death_sound = mixer.Sound("assets/sounds/death.wav")
+        self.attacked_sound = mixer.Sound("assets/sounds/hit.wav")
+        self.attack_sound = mixer.Sound(data["attack_sound"])
+        self.death_sound.set_volume(0.2)
+        self.attacked_sound.set_volume(0.2)
+        self.attack_sound.set_volume(0.3)
+
     def update(self) -> None:
         self.attacked()
         self.move(self.speed)
@@ -97,6 +105,7 @@ class Enemy(Entity):
         if self.state == "attack":
             self.attack_timer = time.get_ticks()
             self.damage_player(self.attack_damage, self.attack)
+            self.attack_sound.play()
             player.needs_save = True
 
         elif self.state == "move":
@@ -142,6 +151,7 @@ class Enemy(Entity):
         elif attack_type == "spell":
             self.health -= player.get_ability_power()
 
+        self.attacked_sound.play()
         self.attacked_timer = time.get_ticks()
         self.can_be_attacked = False
 
@@ -149,6 +159,7 @@ class Enemy(Entity):
         if self.health <= 0:
             self.kill()
             self.spawn_death_particles(self.rect.center, self.name)
+            self.death_sound.play()
             self.gain_experience(self.experience)
 
     def attacked(self) -> None:

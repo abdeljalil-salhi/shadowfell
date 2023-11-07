@@ -82,6 +82,8 @@ SPELL = {
     },
 }
 
+HITBOX_OFFSET = {"player": -26, "object": -40, "grass": -10, "invisible": 0}
+
 # GUI settings
 
 BAR_HEIGHT = 20
@@ -92,15 +94,20 @@ ITEM_BOX_SIZE = 80
 GUI_FONT_FAMILY = "assets/fonts/joystix.ttf"
 GUI_FONT_SIZE = 18
 
-WATER_COLOR = "#0d47a1"
+WATER_COLOR = (113, 221, 238)
 GUI_BACKGROUND_COLOR = "#222222"
 GUI_BORDER_COLOR = "#000000"
 GUI_TEXT_COLOR = "#eeeeee"
+GUI_TEXT_COLOR_SELECTED = "#ffea00"
 
 HEALTH_BAR_COLOR = "#d50000"
 MANA_BAR_COLOR = "#304ffe"
 STAMINA_BAR_COLOR = "#00c853"
 GUI_BORDER_COLOR_ACTIVE = "#ffea00"
+
+BAR_COLOR = "#eeeeee"
+BAR_COLOR_SELECTED = "#ffea00"
+UPGRADE_BG_COLOR_SELECTED = "#eeeeee"
 
 # Enemy settings
 
@@ -110,7 +117,7 @@ ENEMY = {
         "experience": 5,
         "attack": "slash",
         "attack_damage": 20,
-        "attack_sound": "assets/audio/attack/slash.wav",
+        "attack_sound": "assets/sounds/attack/slash.wav",
         "speed": 0.18,
         "resistance": 3,
         "attack_radius": 80,
@@ -121,7 +128,7 @@ ENEMY = {
         "experience": 20,
         "attack": "claw",
         "attack_damage": 40,
-        "attack_sound": "assets/audio/attack/claw.wav",
+        "attack_sound": "assets/sounds/attack/claw.wav",
         "speed": 0.1,
         "resistance": 3,
         "attack_radius": 120,
@@ -132,7 +139,7 @@ ENEMY = {
         "experience": 8,
         "attack": "thunder",
         "attack_damage": 8,
-        "attack_sound": "assets/audio/attack/fireball.wav",
+        "attack_sound": "assets/sounds/attack/fireball.wav",
         "speed": 0.25,
         "resistance": 3,
         "attack_radius": 60,
@@ -143,7 +150,7 @@ ENEMY = {
         "experience": 7,
         "attack": "leaf_attack",
         "attack_damage": 6,
-        "attack_sound": "assets/audio/attack/slash.wav",
+        "attack_sound": "assets/sounds/attack/slash.wav",
         "speed": 0.15,
         "resistance": 3,
         "attack_radius": 60,

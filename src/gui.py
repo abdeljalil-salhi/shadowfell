@@ -45,17 +45,20 @@ class GUI:
 
     def display(self, player) -> None:
         self.display_bar(
-            player.health,
-            player.max_health,
+            player.stats["health"],
+            player.initial_stats["health"],
             self.health_bar_rect,
             HEALTH_BAR_COLOR,
         )
         self.display_bar(
-            player.mana, player.max_mana, self.mana_bar_rect, MANA_BAR_COLOR
+            player.stats["mana"],
+            player.initial_stats["mana"],
+            self.mana_bar_rect,
+            MANA_BAR_COLOR,
         )
         self.display_bar(
-            player.stamina,
-            player.max_stamina,
+            player.stats["stamina"],
+            player.initial_stats["stamina"],
             self.stamina_bar_rect,
             STAMINA_BAR_COLOR,
         )
@@ -102,7 +105,7 @@ class GUI:
             3,
         )
 
-    def display_level(self, level) -> None:
+    def display_level(self, level: int) -> None:
         text_surface = self.font.render(f"LVL {level}", False, GUI_TEXT_COLOR)
         text_rect = text_surface.get_rect(
             bottomleft=(
@@ -123,7 +126,7 @@ class GUI:
             3,
         )
 
-    def display_experience(self, experience) -> None:
+    def display_experience(self, experience: float) -> None:
         text_surface = self.font.render(f"{int(experience)} EXP", False, GUI_TEXT_COLOR)
         text_rect = text_surface.get_rect(
             bottomright=(

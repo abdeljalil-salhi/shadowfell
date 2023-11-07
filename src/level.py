@@ -7,6 +7,7 @@ from settings import *
 from debug import debug
 from src.tile import Tile
 from src.gui import GUI
+from src.upgrade import Upgrade
 from src.player import Player
 from src.enemy import Enemy
 from src.weapon import Weapon
@@ -43,6 +44,7 @@ class Level:
             with open("data/player.json", "r") as file:
                 self.player_data = load(file)
 
+        self.paused = False
         self.display_surface = display.get_surface()
         self.visible_sprites = FollowingCameraGroup()
         self.obstacle_sprites = sprite.Group()
@@ -50,17 +52,23 @@ class Level:
         self.attackable_sprites = sprite.Group()
         self.current_attack = None
 
+        self.create_map()
+
         self.gui = GUI()
+        self.upgrade = Upgrade(self.player)
         self.animation_player = AnimationPlayer()
         self.spells = Spells(self.game, self.animation_player)
-        self.create_map()
 
     def run(self) -> None:
         self.visible_sprites.custom_draw(self.player)
-        self.visible_sprites.update()
         self.gui.display(self.player)
-        self.player_attack_logic()
-        self.visible_sprites.enemy_update(self.player)
+
+        if self.paused:
+            self.upgrade.display()
+        else:
+            self.visible_sprites.update()
+            self.player_attack_logic()
+            self.visible_sprites.enemy_update(self.player)
 
         if DEBUG:
             width = self.display_surface.get_width()
@@ -188,9 +196,9 @@ class Level:
 
     def player_damage_logic(self, amount: int, attack: str) -> None:
         if self.player.can_be_attacked:
-            self.player.health -= amount
-            if self.player.health < 0:
-                self.player.health = 0
+            self.player.stats["health"] -= amount
+            if self.player.stats["health"] < 0:
+                self.player.stats["health"] = 0
             self.player.can_be_attacked = False
             self.player.attacked_timer = time.get_ticks()
             self.animation_player.spawn_particles(
@@ -208,17 +216,16 @@ class Level:
             self.player.experience -= self.player.max_experience
             self.player.level += 1
             self.player.max_experience += 100
-            self.player.max_health += 10
-            self.player.health = self.player.max_health
-            self.player.max_mana += 10
-            self.player.mana = self.player.max_mana
-            self.player.max_stamina += 10
-            self.player.stamina = self.player.max_stamina
-            self.player.armor += 1
-            self.player.attack_damage += 1
-            self.player.ability_power += 1
-            self.player.speed += 0.03
-            # self.player.level_up_timer = time.get_ticks()
+            self.player.initial_stats["health"] += 10
+            self.player.stats["health"] = self.player.initial_stats["health"]
+            self.player.initial_stats["mana"] += 10
+            self.player.stats["mana"] = self.player.initial_stats["mana"]
+            self.player.initial_stats["stamina"] += 10
+            self.player.stats["stamina"] = self.player.initial_stats["stamina"]
+            self.player.stats["armor"] += 1
+            self.player.stats["attack_damage"] += 1
+            self.player.stats["ability_power"] += 1
+            self.player.stats["speed"] += 0.03
             self.animation_player.spawn_particles(
                 self.game,
                 "aura",
@@ -227,6 +234,9 @@ class Level:
             )
             self.game.level.gui.level_up()
         self.player.needs_save = True
+
+    def toggle_menu(self) -> None:
+        self.paused = not self.paused
 
 
 class FollowingCameraGroup(sprite.Group):
