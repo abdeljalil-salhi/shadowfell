@@ -33,7 +33,8 @@ class Game:
         self.level = Level(self)
 
         backgound_music = mixer.Sound("assets/sounds/main.ogg")
-        backgound_music.play(-1)
+        if not MUTE:
+            backgound_music.play(-1)
 
     def run(self) -> None:
         while True:

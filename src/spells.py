@@ -26,8 +26,9 @@ class Spells:
             )
             return
         player.stats["mana"] -= cost
+        if not MUTE:
+            self.sounds["heal"].play()
 
-        self.sounds["heal"].play()
         player.stats["health"] += efficiency
         if player.stats["health"] > player.initial_stats["health"]:
             player.stats["health"] = player.initial_stats["health"]
@@ -54,8 +55,9 @@ class Spells:
             )
             return
         player.stats["mana"] -= cost
+        if not MUTE:
+            self.sounds["flame"].play()
 
-        self.sounds["flame"].play()
         state = player.state.split("_")[0]
         if state == "right":
             direction = math.Vector2(1, 0)

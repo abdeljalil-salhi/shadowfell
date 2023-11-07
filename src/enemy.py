@@ -105,7 +105,8 @@ class Enemy(Entity):
         if self.state == "attack":
             self.attack_timer = time.get_ticks()
             self.damage_player(self.attack_damage, self.attack)
-            self.attack_sound.play()
+            if not MUTE:
+                self.attack_sound.play()
             player.needs_save = True
 
         elif self.state == "move":
@@ -151,7 +152,8 @@ class Enemy(Entity):
         elif attack_type == "spell":
             self.health -= player.get_ability_power()
 
-        self.attacked_sound.play()
+        if not MUTE:
+            self.attacked_sound.play()
         self.attacked_timer = time.get_ticks()
         self.can_be_attacked = False
 
@@ -159,7 +161,8 @@ class Enemy(Entity):
         if self.health <= 0:
             self.kill()
             self.spawn_death_particles(self.rect.center, self.name)
-            self.death_sound.play()
+            if not MUTE:
+                self.death_sound.play()
             self.gain_experience(self.experience)
 
     def attacked(self) -> None:

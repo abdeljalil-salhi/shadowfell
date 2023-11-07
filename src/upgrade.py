@@ -21,7 +21,7 @@ class Upgrade:
         self.able_to_move = True
 
         # Item settings
-        self.height = self.display_surface.get_height() * 0.8
+        self.height = self.display_surface.get_height() * 0.6
         self.width = self.display_surface.get_width() // (self.stats_length + 1)
         self.item_list = []
         self.create_items()
@@ -68,7 +68,7 @@ class Upgrade:
         for item, index in enumerate(range(self.stats_length)):
             increment = self.display_surface.get_width() // self.stats_length
             left = (item * increment) + (increment - self.width) // 2
-            top = self.display_surface.get_height() * 0.1
+            top = self.display_surface.get_height() * 0.2
             self.item_list.append(
                 Item(left, top, self.width, self.height, index, self.font)
             )

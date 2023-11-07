@@ -9,7 +9,9 @@ from pygame import (
     K_SPACE,
     K_LSHIFT,
     K_q,
+    K_a,
     K_w,
+    K_z,
     K_e,
     transform,
     time,
@@ -218,10 +220,11 @@ class Player(Entity):
             self.attacking = True
             self.attack_timer = time.get_ticks()
             self.create_attack()
-            self.weapon_attack_sound.play()
+            if not MUTE:
+                self.weapon_attack_sound.play()
 
-        # Cast a spell if the player is holding Q
-        if keys[K_q]:
+        # Cast a spell if the player is holding Q or A (layout dependent)
+        if QWERTY and keys[K_q] or not QWERTY and keys[K_a]:
             self.attacking = True
             self.attack_timer = time.get_ticks()
             self.create_spell(
@@ -231,7 +234,9 @@ class Player(Entity):
                 list(SPELL.values())[self.spell_selected]["cost"],
             )
 
-        if keys[K_w] and self.able_to_switch_weapon:
+        if (
+            QWERTY and keys[K_w] or not QWERTY and keys[K_z]
+        ) and self.able_to_switch_weapon:
             self.able_to_switch_weapon = False
             self.weapon_switch_timer = time.get_ticks()
             self.weapon_selected = (self.weapon_selected + 1) % len(WEAPON)
